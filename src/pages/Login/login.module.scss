@@ -1,0 +1,55 @@
+.container_fluid {
+    // background-color: aqua;
+    height: auto;
+    width: 80%;
+    margin: auto;
+    padding-top: 5vh;
+}
+
+.card {
+    background-color: white;
+    // height: 100%;
+    width: 90%;
+    margin: auto;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+    width: 100%;
+}
+
+
+// Media queries 
+
+
+
+@media screen and (min-width: 768px) {
+
+    .card {
+        width: 70%;
+    }
+
+
+}
+
+@media screen and (min-width: 992px) {
+    .container_fluid {
+        height: 100vh;
+    }
+
+    .card {
+        width: 70%;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .container_fluid {
+        height: 100vh;
+    }
+
+    .card {
+        width: 40%;
+    }
+}
