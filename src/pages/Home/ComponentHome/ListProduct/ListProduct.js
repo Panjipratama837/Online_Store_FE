@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import React from 'react'
 import { EditOutlined } from '@ant-design/icons';
 import { ActionTable } from '../../../../utils';
-import { useGetProductsQuery } from '../../../../api/productApiSlice';
+import { useGetProductsDetailQuery, useGetProductsQuery } from '../../../../api/productApiSlice';
 
 
 
@@ -15,6 +15,8 @@ const ListProduct = () => {
         isSuccess,
         isError,
     } = useGetProductsQuery()
+
+    const { data: productDetail, isLoading: isLoadingDetail, isSuccess: isSuccessDetail, isError: isErrorDetail } = useGetProductsDetailQuery()
 
 
 
@@ -28,8 +30,13 @@ const ListProduct = () => {
         navigate('/admin/products/add-product')
     }
 
-    const handleAction = (e) => {
+    const handleAction = (e, value) => {
+        console.log('Record : ', value);
         console.log('values : ', e.target.innerText);
+
+        if (e.target.innerText === 'Edit') {
+            navigate('/admin/products/add-product', { state: value })
+        }
     }
 
 
@@ -80,8 +87,10 @@ const ListProduct = () => {
             title: 'Action',
             key: 'action',
             align: 'center',
-            render: () => (
-                <ActionTable arrayContent={['Edit', 'Delete']} onClick={handleAction} />
+            render: (record) => (
+                <ActionTable arrayContent={['Edit', 'Delete']} onClick={(e) => {
+                    handleAction(e, record)
+                }} />
                 // <p>haha</p>
             ),
         },

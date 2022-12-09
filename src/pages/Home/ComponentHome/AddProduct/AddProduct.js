@@ -11,6 +11,8 @@ const AddProduct = () => {
     const [updateProduct] = useUpdateProductMutation()
 
 
+
+
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -61,6 +63,9 @@ const AddProduct = () => {
 
     useEffect(() => {
         if (productDetail) {
+            setQuantity(productDetail.quantity)
+            setSizeProduct(productDetail.size)
+
             addProductForm.setFieldsValue({
                 productName: productDetail.productName,
                 category: productDetail.category,
@@ -273,7 +278,7 @@ const AddProduct = () => {
             <h1 style={{
                 fontSize: '1rem',
                 fontWeight: '600',
-            }}>Add Product</h1>
+            }}>{productDetail ? 'Update Product' : 'Add Product'}</h1>
 
             <Row style={{
                 marginTop: '1.5rem',
@@ -421,30 +426,7 @@ const AddProduct = () => {
                         <Form.Item name="quantity" label="Quantity" >
                             <Row>
 
-                                {productDetail ? productDetail.quantity.map((item, index) => {
-                                    return (
-                                        <Col key={index} span={4}>
-                                            <Row>
-                                                <p style={{
-                                                    margin: 'auto',
-                                                }}>{item[0]}</p>
-                                                <InputNumber style={{
-                                                    width: '60%',
-                                                }} min={0} max={100}
-                                                    disabled={productDetail?.size.includes(item[0]) ? false : true}
-                                                    onChange={(value) => {
-                                                        // change productDetail.quantity value
-                                                        let newQuantity = [...productDetail.quantity]
-                                                        newQuantity[index][1] = value
-                                                        productDetail.quantity = newQuantity
-
-                                                    }}
-                                                    value={item[1]}
-                                                />
-                                            </Row>
-                                        </Col>
-                                    )
-                                }) : displayQuantity}
+                                {displayQuantity}
 
                             </Row>
 
