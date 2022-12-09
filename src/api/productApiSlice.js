@@ -26,13 +26,14 @@ export const productApiSlice = createApi({
         }),
 
         updateProduct: builder.mutation({
-            query: (newProduct) => ({
-                url: `api/products/update/${newProduct.id}`,
+            query: (updateProduct) => ({
+                url: `api/products/update/${updateProduct.id}`,
                 method: 'PATCH',
-                body: newProduct,
+                body: updateProduct,
             }),
             invalidatesTags: ['Products'],
         }),
+
 
         deleteTodo: builder.mutation({
             query: (id) => ({

@@ -4,7 +4,7 @@ import UploadPicture from './UploadPicture'
 
 import axios from 'axios'
 import { useAddProductMutation, useUpdateProductMutation } from '../../../../api/productApiSlice'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const AddProduct = () => {
     const [addProduct, { isLoading, isSuccess, isError }] = useAddProductMutation()
@@ -12,6 +12,8 @@ const AddProduct = () => {
 
 
     const location = useLocation();
+    const navigate = useNavigate();
+
     const productDetail = location.state
 
     console.log('productDetail : ', productDetail);
@@ -46,6 +48,13 @@ const AddProduct = () => {
             ['XL', 0],
         ]
     )
+
+    // const [productUpdate, setProductUpdate] = React.useState(
+    //     productDetail.quantity
+    // )
+
+
+    // console.log('productDetail2 : ', productUpdate);
     console.log('quantity : ', quantity);
 
 
@@ -113,6 +122,10 @@ const AddProduct = () => {
         // console.log("filteredQuantity", filteredQuantity)
 
         values.quantity = quantity
+        if (productDetail) {
+            values.quantity = productDetail.quantity
+            values.id = productDetail.id
+        }
 
 
         // cek type data 
@@ -140,27 +153,16 @@ const AddProduct = () => {
         console.log("data : ", data);
 
         if (productDetail) {
+            console.log("updateeee");
             updateProduct(data)
                 .unwrap()
                 .then((res) => {
-                    console.log("res : ", res);
-                    addProductForm.resetFields();
-                    addProductForm2.resetFields();
-
-                    setSizeProduct([])
-                    setQuantity(
-                        [
-                            ['XS', 0],
-                            ['S', 0],
-                            ['M', 0],
-                            ['L', 0],
-                            ['XL', 0],
-                        ]
-                    )
+                    navigate('/admin/products')
                 })
                 .catch((err) => {
                     console.log("err : ", err);
                 })
+
         } else {
             addProduct(data)
                 .unwrap()
@@ -217,7 +219,16 @@ const AddProduct = () => {
     const handleCheckbox = (value) => {
         console.log('value : ', value);
         setSizeProduct(value)
-        productDetail.size = value
+
+
+        if (productDetail) {
+            productDetail.size = value
+            if (!productDetail.size.includes('XS')) {
+                let newQuantity = [...productDetail.quantity]
+                newQuantity[0][1] = 0
+                productDetail.quantity = newQuantity
+            }
+        }
 
         if (!value.includes('XS')) {
             let newQuantity = [...quantity]
@@ -248,6 +259,10 @@ const AddProduct = () => {
             newQuantity[4][1] = 0
             setQuantity(newQuantity)
         }
+
+
+
+
     }
 
 
@@ -403,12 +418,7 @@ const AddProduct = () => {
                             </Checkbox.Group>
                         </Form.Item>
 
-                        <Form.Item name="quantity" label="Quantity" rules={[
-                            {
-                                // required: true,
-                                // message: 'Please input your size!',
-                            },
-                        ]}>
+                        <Form.Item name="quantity" label="Quantity" >
                             <Row>
 
                                 {productDetail ? productDetail.quantity.map((item, index) => {
@@ -423,12 +433,13 @@ const AddProduct = () => {
                                                 }} min={0} max={100}
                                                     disabled={productDetail?.size.includes(item[0]) ? false : true}
                                                     onChange={(value) => {
-                                                        console.log("kasur : ", value);
-                                                        productDetail.quantity[index][1] = value;
-                                                        console.log("jurid : ", productDetail);
+                                                        // change productDetail.quantity value
+                                                        let newQuantity = [...productDetail.quantity]
+                                                        newQuantity[index][1] = value
+                                                        productDetail.quantity = newQuantity
 
                                                     }}
-                                                // value={item[1]}
+                                                    value={item[1]}
                                                 />
                                             </Row>
                                         </Col>
@@ -462,7 +473,7 @@ const AddProduct = () => {
                             }}
                         >
                             <Button type="primary" htmlType="submit">
-                                Submit
+                                {productDetail ? 'Update' : 'Submit'}
                             </Button>
                         </Form.Item>
 
