@@ -2,28 +2,66 @@ import { Button, Input, Popover, Space, Table } from 'antd'
 import { Link, useNavigate } from 'react-router-dom';
 import React from 'react'
 import { EditOutlined } from '@ant-design/icons';
-import { ActionTable } from '../../../../utils';
-import { useGetProductsDetailQuery, useGetProductsQuery } from '../../../../api/productApiSlice';
+import { ActionTable, moneyFormatIDR } from '../../../../utils';
+import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/productApiSlice';
 
 
 
 const ListProduct = () => {
+
+    const dataBarang = [
+        {
+            id: 1,
+            productName: 'Baju',
+            description: 'Baju keren',
+            price: 10000,
+        },
+        {
+            id: 1,
+            productName: 'Baju',
+            description: 'Baju keren',
+            price: 10000,
+        }
+    ]
+
+    // add key to data
+    const newData = dataBarang.map((item, index) => ({ ...item, key: index }))
+    console.log('data : ', newData);
 
     const {
         data: products,
         isLoading,
         isSuccess,
         isError,
+        currentData,
+
     } = useGetProductsQuery()
 
-    const { data: productDetail, isLoading: isLoadingDetail, isSuccess: isSuccessDetail, isError: isErrorDetail } = useGetProductsDetailQuery()
 
+    const [deleteProduct] = useDeleteProductMutation()
+    console.log('products : ', products);
+    console.log('currentData : ', currentData);
 
-
-    console.log('products hahay : ', products);
     console.log('isLoading : ', isLoading);
     console.log('isSuccess : ', isSuccess);
     console.log('isError : ', isError);
+
+    // random three number
+
+    console.log('Random : ', Math.floor(Math.random() * 10));
+
+
+
+
+    // const testReduce = isSuccess && products.map((item) => item.quantity.map((item) => item[1]))
+
+    // console.log('testReduce : ', testReduce);
+
+    // const reReduce = isSuccess && products.map((item) => item.quantity.map((item) => item[1]).reduce((a, b) => a + b))
+
+
+    // console.log('products hahay : ', reReduce);
+
 
     const navigate = useNavigate();
     const handleAdd = () => {
@@ -37,6 +75,21 @@ const ListProduct = () => {
         if (e.target.innerText === 'Edit') {
             navigate('/admin/products/add-product', { state: value })
         }
+
+        if (e.target.innerText === 'Delete') {
+            deleteProduct(value.id)
+                .unwrap()
+                .then((res) => {
+                    console.log('res delete : ', res);
+                })
+                .catch((err) => {
+                    console.log('err : ', err);
+                })
+
+
+
+        }
+
     }
 
 
@@ -75,12 +128,18 @@ const ListProduct = () => {
             title: 'Price',
             dataIndex: 'price',
             align: 'center',
+            render: (text) => (
+                <p>{`Rp. ${moneyFormatIDR(text)}`}</p>
+            )
 
         },
         {
             title: 'Total Quantity',
-            dataIndex: 'quantity',
+            dataIndex: 'totalQuantity',
             align: 'center',
+            render: (text, record) => (
+                <p>{`${text} pcs`}</p>
+            )
 
         },
         {
@@ -164,7 +223,7 @@ const ListProduct = () => {
                 <Table
                     rowKey={record => record.id}
                     columns={columns}
-                    dataSource={products}
+                    dataSource={products?.data}
                     style={{
                         marginTop: '1.5rem',
                     }}

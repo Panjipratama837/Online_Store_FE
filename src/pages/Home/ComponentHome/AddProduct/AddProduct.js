@@ -444,7 +444,7 @@ const AddProduct = () => {
                                 },
                             ]}
                         >
-                            <InputNumber min={0} max={100} />
+                            <InputNumber min={0} max={10000000} defaultValue={0} />
                         </Form.Item>
 
 

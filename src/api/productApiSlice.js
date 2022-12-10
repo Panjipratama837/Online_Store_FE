@@ -35,9 +35,9 @@ export const productApiSlice = createApi({
         }),
 
 
-        deleteTodo: builder.mutation({
+        deleteProduct: builder.mutation({
             query: (id) => ({
-                url: `/todos/${id}`,
+                url: `api/products/delete/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: ['Products'],
@@ -51,6 +51,5 @@ export const {
     useAddProductMutation,
     useGetProductsDetailQuery,
     useUpdateProductMutation,
-
-    useDeleteTodoMutation,
+    useDeleteProductMutation,
 } = productApiSlice

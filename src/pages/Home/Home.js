@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { HomeOutlined, LogoutOutlined, ShoppingCartOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons';
+import { HomeOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ShoppingCartOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Modal, theme } from 'antd';
 import { Outlet } from 'react-router-dom';
-const { Content, Sider } = Layout;
+import BreadCrumb from '../../component/breadcumb/BreadCumb';
+const { Content, Sider, Header } = Layout;
 
 function getItem(label, key, icon, children, type) {
   return {
@@ -14,6 +15,7 @@ function getItem(label, key, icon, children, type) {
     type,
   };
 }
+
 const items2 = [
   getItem('Dashboard', 'admin', <HomeOutlined />),
   getItem('Profile', 'profile', <UserOutlined />),
@@ -39,9 +41,13 @@ const items2 = [
 
 
 
+
 const Home = () => {
+  console.log("Item Menu", items2);
+
   const navigate = useNavigate();
   const [key, setKey] = React.useState('');
+  const [collapsed, setCollapsed] = React.useState(false);
 
 
   useEffect(() => {
@@ -138,6 +144,7 @@ const Home = () => {
         <Layout>
           <Sider
             width={200}
+            trigger={null} collapsible collapsed={collapsed}
             style={{
               background: colorBgContainer,
             }}
@@ -167,6 +174,27 @@ const Home = () => {
               padding: '24px',
             }}
           >
+
+
+
+            {/* <Breadcrumb
+              style={{
+                margin: '16px 0',
+              }}
+            >
+
+              <Breadcrumb.Item>
+                {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                  className: 'trigger',
+                  onClick: () => setCollapsed(!collapsed),
+                })}
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Home</Breadcrumb.Item>
+              <Breadcrumb.Item>List</Breadcrumb.Item>
+              <Breadcrumb.Item>App</Breadcrumb.Item>
+            </Breadcrumb> */}
+
+            <BreadCrumb />
 
             <Content
               style={{
