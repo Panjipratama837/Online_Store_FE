@@ -1,4 +1,4 @@
-import { Button, Input, Popover, Space, Table } from 'antd'
+import { Button, Checkbox, Col, Input, Popover, Row, Space, Table } from 'antd'
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react'
 import { EditOutlined } from '@ant-design/icons';
@@ -9,13 +9,26 @@ import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/p
 
 const ListProduct = () => {
     const [totalRecorded, setTotalRecorded] = useState(0);
+    const [selectCategory, setSelectCategory] = useState('all');
+
+
+
+    console.log('selectCategory : ', selectCategory);
 
     const [queryParams, setQueryParams] = useState({
         page: 0,
         size: 4,
         category: 'all',
-        productName: '',
+        search: '',
     });
+
+    const handleCheckbox = (value) => {
+
+        setQueryParams({
+            ...queryParams,
+            category: value.toString(),
+        })
+    }
 
     console.log('queryParams : ', queryParams);
 
@@ -30,7 +43,7 @@ const ListProduct = () => {
 
     useEffect(() => {
         isSuccess && (
-            setTotalRecorded(products.totalData)
+            setTotalRecorded(products.total)
         );
 
 
@@ -200,7 +213,7 @@ const ListProduct = () => {
         console.log('value : ', value);
         setQueryParams({
             ...queryParams,
-            category: value
+            search: value
         })
     };
     return (
@@ -222,6 +235,26 @@ const ListProduct = () => {
                         <Search placeholder="Search product" onSearch={onSearch} />
                         <Button onClick={handleAdd} type="primary">Add new product</Button>
                     </Space>
+
+                    <Checkbox.Group onChange={handleCheckbox} >
+                        <Row>
+                            <Space size={24}>
+                                <Col span={4}>
+                                    <Checkbox value="shirt">Shirt</Checkbox>
+                                </Col>
+                                <Col span={4}>
+                                    <Checkbox value="t-shirt">T-shirt</Checkbox>
+                                </Col>
+                                <Col span={4}>
+                                    <Checkbox value="jacket">Jacket</Checkbox>
+                                </Col>
+                                <Col span={4}>
+                                    <Checkbox value="pants">Pants</Checkbox>
+                                </Col>
+                            </Space>
+
+                        </Row>
+                    </Checkbox.Group>
                 </div>
             </header>
             <main>
