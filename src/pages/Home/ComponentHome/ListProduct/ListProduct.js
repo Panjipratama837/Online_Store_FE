@@ -1,6 +1,6 @@
 import { Button, Input, Popover, Space, Table } from 'antd'
 import { Link, useNavigate } from 'react-router-dom';
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { EditOutlined } from '@ant-design/icons';
 import { ActionTable, moneyFormatIDR } from '../../../../utils';
 import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/productApiSlice';
@@ -8,25 +8,16 @@ import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/p
 
 
 const ListProduct = () => {
+    const [totalRecorded, setTotalRecorded] = useState(0);
 
-    const dataBarang = [
-        {
-            id: 1,
-            productName: 'Baju',
-            description: 'Baju keren',
-            price: 10000,
-        },
-        {
-            id: 1,
-            productName: 'Baju',
-            description: 'Baju keren',
-            price: 10000,
-        }
-    ]
+    const [queryParams, setQueryParams] = useState({
+        page: 0,
+        size: 4,
+        category: 'all',
+        productName: '',
+    });
 
-    // add key to data
-    const newData = dataBarang.map((item, index) => ({ ...item, key: index }))
-    console.log('data : ', newData);
+    console.log('queryParams : ', queryParams);
 
     const {
         data: products,
@@ -35,11 +26,19 @@ const ListProduct = () => {
         isError,
         currentData,
 
-    } = useGetProductsQuery()
+    } = useGetProductsQuery(queryParams, { skip: false })
+
+    useEffect(() => {
+        isSuccess && (
+            setTotalRecorded(products.totalData)
+        );
+
+
+    }, [products, isSuccess, queryParams,])
 
 
     const [deleteProduct] = useDeleteProductMutation()
-    console.log('products : ', products);
+    console.log('products : ', products?.data);
     console.log('currentData : ', currentData);
 
     console.log('isLoading : ', isLoading);
@@ -67,6 +66,7 @@ const ListProduct = () => {
     const handleAdd = () => {
         navigate('/admin/products/add-product')
     }
+
 
     const handleAction = (e, value) => {
         console.log('Record : ', value);
@@ -116,7 +116,6 @@ const ListProduct = () => {
             title: 'Category',
             dataIndex: 'category',
             align: 'center',
-
         },
         {
             title: 'Description',
@@ -197,7 +196,13 @@ const ListProduct = () => {
 
     ]
 
-    const onSearch = (value) => console.log(value);
+    const onSearch = (value) => {
+        console.log('value : ', value);
+        setQueryParams({
+            ...queryParams,
+            category: value
+        })
+    };
     return (
         <>
             <header style={{
@@ -228,7 +233,19 @@ const ListProduct = () => {
                         marginTop: '1.5rem',
                     }}
                     pagination={{
-                        pageSize: 10,
+                        current: queryParams.page + 1,
+                        pageSize: queryParams.size,
+                        total: totalRecorded,
+                        onChange: (page, pageSize) => {
+                            console.log('page : ', page);
+                            console.log('pageSize : ', pageSize);
+                            setQueryParams({
+                                ...queryParams,
+                                page: page - 1,
+                                size: pageSize,
+                            })
+                        },
+
                         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                     }}
                     scroll={{

@@ -6,7 +6,12 @@ export const productApiSlice = createApi({
     tagTypes: ['Products'],
     endpoints: (builder) => ({
         getProducts: builder.query({
-            query: () => 'api/products',
+            query: ({ page, size, category, productName }) => {
+                console.log('asu page : ', page);
+                console.log('asu size : ', size);
+                console.log('asu category : ', category);
+                return `api/products?page=${page + 1}&size=${size}&category=${category}`
+            },
             providesTags: ['Products'],
         }),
 

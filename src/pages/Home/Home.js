@@ -176,25 +176,18 @@ const Home = () => {
           >
 
 
-
-            {/* <Breadcrumb
-              style={{
-                margin: '16px 0',
-              }}
-            >
-
-              <Breadcrumb.Item>
-                {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-                  className: 'trigger',
-                  onClick: () => setCollapsed(!collapsed),
-                })}
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Home</Breadcrumb.Item>
-              <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>App</Breadcrumb.Item>
-            </Breadcrumb> */}
-
-            <BreadCrumb />
+            <div style={{
+              display: 'flex',
+              paddingBottom: '20px',
+            }}>
+              {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                className: 'trigger',
+                style: {
+                  fontSize: '1.5rem',
+                },
+                onClick: () => setCollapsed(!collapsed),
+              })}
+            </div>
 
             <Content
               style={{
