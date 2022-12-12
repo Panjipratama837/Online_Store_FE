@@ -1,20 +1,30 @@
-import { Button, Checkbox, Col, Input, InputNumber, Modal, Popover, Row, Slider, Space, Table } from 'antd'
-import { Link, useNavigate } from 'react-router-dom';
+import { Button, Checkbox, Col, Input, InputNumber, Modal, notification, Popover, Row, Slider, Space, Table } from 'antd'
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import currencyFormatter from 'currency-formatter';
 
 import React, { useEffect, useState } from 'react'
 import { EditOutlined, FilterFilled, PlusSquareFilled, PlusSquareOutlined, SortAscendingOutlined } from '@ant-design/icons';
-import { ActionTable, moneyFormatIDR } from '../../../../utils';
+import { ActionTable, moneyFormatIDR, Notification } from '../../../../utils';
 import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/productApiSlice';
 
 
 
 const ListProduct = () => {
+
     // local State
     const navigate = useNavigate();
     const { Search } = Input;
+    const location = useLocation();
+
     const [inputValue, setInputValue] = useState(0);
     console.log('inputValue : ', inputValue);
+
+    // const notif = location.state?.notif;
+    const [notif, setNotif] = useState(false);
+
+    console.log('notif : ', notif);
+    const [message, setMessage] = useState('');
+    console.log('message : ', message);
 
 
     const [price, setPrice] = useState({
@@ -217,20 +227,41 @@ const ListProduct = () => {
         setCategory(value)
     }
 
+    const confirm = (id) => {
+        Modal.confirm({
+            title: 'Delete Product',
+            content: (
+                <div>
+                    <p>Are you sure ?</p>
+                </div>
+            ),
+            onOk() {
+                deleteProduct(id)
+                    .unwrap()
+                    .then((res) => {
+                        console.log('res delete : ', res);
+                        setMessage(res.message)
+                        setNotif(true)
+                    })
+                    .catch((err) => {
+                        console.log('err : ', err);
+                    })
+
+            },
+        });
+    };
+
+
+
     const handleAction = (e, value) => {
         if (e.target.innerText === 'Edit') {
             navigate('/admin/products/add-product', { state: value })
         }
 
         if (e.target.innerText === 'Delete') {
-            deleteProduct(value.id)
-                .unwrap()
-                .then((res) => {
-                    console.log('res delete : ', res);
-                })
-                .catch((err) => {
-                    console.log('err : ', err);
-                })
+            confirm(value.id)
+
+
 
 
 
@@ -268,10 +299,35 @@ const ListProduct = () => {
         )
     }, [products, isSuccess, queryParams])
 
+    useEffect(() => {
+
+        window.onload = () => {
+            setNotif(false);
+        }
+
+        if (location.state?.notif) {
+            setNotif(true)
+        }
+
+        if (location.state?.message) {
+            setMessage(location.state?.message)
+        }
+
+
+        setTimeout(() => {
+            setNotif(false)
+            // setMessage('')
+        }, 2000);
+
+    }, [])
+
     console.log('price : ', price);
 
     return (
         <>
+            {notif && (
+                <Notification message={message} />
+            )}
             <header style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -294,6 +350,8 @@ const ListProduct = () => {
                             })
 
                         }} />
+
+
                         <FilterFilled style={{
                             fontSize: '2rem',
                             cursor: 'pointer',

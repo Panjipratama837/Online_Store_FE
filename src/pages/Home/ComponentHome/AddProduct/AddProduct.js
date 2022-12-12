@@ -5,6 +5,7 @@ import UploadPicture from './UploadPicture'
 import axios from 'axios'
 import { useAddProductMutation, useUpdateProductMutation } from '../../../../api/productApiSlice'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Notification } from '../../../../utils'
 
 const AddProduct = () => {
     // Local State
@@ -16,6 +17,7 @@ const AddProduct = () => {
 
     const productDetail = location.state
 
+    const [notif, setNotif] = useState(false)
     const [sizeProduct, setSizeProduct] = useState([])
     const [fileImage, setFileImage] = useState([])
     const [quantity, setQuantity] = React.useState(
@@ -45,6 +47,8 @@ const AddProduct = () => {
                     }} min={0} max={100}
                         disabled={sizeProduct.includes(item[0]) ? false : true}
                         onChange={(value) => {
+                            console.log("value number : ", value);
+
                             let newQuantity = [...quantity]
                             newQuantity[index][1] = value
                             setQuantity(newQuantity)
@@ -62,6 +66,10 @@ const AddProduct = () => {
             values.quantity = productDetail.quantity
             values.id = productDetail.id
         }
+
+        const newTotalQuantity = quantity.map((item) => item[1]).reduce((a, b) => a + b)
+
+        values.totalQuantity = newTotalQuantity
 
 
         const dataPicture = []
@@ -84,7 +92,8 @@ const AddProduct = () => {
             updateProduct(data)
                 .unwrap()
                 .then((res) => {
-                    navigate('/admin/products')
+                    console.log("res update: ", res);
+                    navigate('/admin/products', { state: { notif: true, message: res.message } })
                 })
                 .catch((err) => {
                     console.log("err : ", err);
@@ -113,6 +122,9 @@ const AddProduct = () => {
                     console.log("err : ", err);
                 })
         }
+
+        setNotif(true)
+
     };
 
     const onFinishFailed2 = (errorInfo) => {
@@ -178,6 +190,9 @@ const AddProduct = () => {
 
     return (
         <>
+            {notif && (
+                <Notification message="message from parent" />
+            )}
             <h1 style={{
                 fontSize: '1rem',
                 fontWeight: '600',

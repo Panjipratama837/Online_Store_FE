@@ -1,4 +1,5 @@
-import ActionTable from "./ActionTable/ActionTable";
-import moneyFormatIDR from "./MoneyFormatIDR";
+import ActionTable from "./Component/ActionTable/ActionTable";
+import moneyFormatIDR from "./Component/MoneyFormatIDR";
+import Notification from "./Component/Notification/Notification";
 
-export { ActionTable, moneyFormatIDR };
+export { ActionTable, moneyFormatIDR, Notification };
