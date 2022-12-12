@@ -4,7 +4,7 @@ import React from 'react'
 import Styles from './ActionTable.module.scss'
 
 const ActionTable = (props) => {
-    const { onClick, arrayContent } = props;
+    const { onClick, arrayContent, icon } = props;
     const [open, setOpen] = React.useState(false);
     // const hide = () => {
     //     setOpen(false);
@@ -32,7 +32,9 @@ const ActionTable = (props) => {
             open={open}
             onOpenChange={handleOpenChange}
         >
-            <EditOutlined className={Styles.edit_action} />
+
+            {icon ? icon : <EditOutlined className={Styles.edit_action} />}
+
         </Popover>
     )
 }

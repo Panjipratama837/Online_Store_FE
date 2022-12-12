@@ -1,113 +1,68 @@
-import { Button, Checkbox, Col, Input, Popover, Row, Space, Table } from 'antd'
+import { Button, Checkbox, Col, Input, InputNumber, Modal, Popover, Row, Slider, Space, Table } from 'antd'
 import { Link, useNavigate } from 'react-router-dom';
+import currencyFormatter from 'currency-formatter';
+
 import React, { useEffect, useState } from 'react'
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, FilterFilled, PlusSquareFilled, PlusSquareOutlined, SortAscendingOutlined } from '@ant-design/icons';
 import { ActionTable, moneyFormatIDR } from '../../../../utils';
 import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/productApiSlice';
 
 
 
 const ListProduct = () => {
+    // local State
+    const navigate = useNavigate();
+    const { Search } = Input;
+    const [inputValue, setInputValue] = useState(0);
+    console.log('inputValue : ', inputValue);
+
+
+    const [price, setPrice] = useState({
+        min: 0,
+        max: 0,
+    });
     const [totalRecorded, setTotalRecorded] = useState(0);
-    const [selectCategory, setSelectCategory] = useState('all');
-
-
-
-    console.log('selectCategory : ', selectCategory);
-
+    const [category, setCategory] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [queryParams, setQueryParams] = useState({
         page: 0,
-        size: 4,
+        size: 5,
         category: 'all',
         search: '',
+        price: 10000000,
+        sort: ''
     });
 
-    const handleCheckbox = (value) => {
+    console.log('category : ', category);
 
-        setQueryParams({
-            ...queryParams,
-            category: value.toString(),
-        })
-    }
-
-    console.log('queryParams : ', queryParams);
-
-    const {
-        data: products,
-        isLoading,
-        isSuccess,
-        isError,
-        currentData,
-
-    } = useGetProductsQuery(queryParams, { skip: false })
-
-    useEffect(() => {
-        isSuccess && (
-            setTotalRecorded(products.total)
-        );
-
-
-    }, [products, isSuccess, queryParams,])
-
-
-    const [deleteProduct] = useDeleteProductMutation()
-    console.log('products : ', products?.data);
-    console.log('currentData : ', currentData);
-
-    console.log('isLoading : ', isLoading);
-    console.log('isSuccess : ', isSuccess);
-    console.log('isError : ', isError);
-
-    // random three number
-
-    console.log('Random : ', Math.floor(Math.random() * 10));
-
-
-
-
-    // const testReduce = isSuccess && products.map((item) => item.quantity.map((item) => item[1]))
-
-    // console.log('testReduce : ', testReduce);
-
-    // const reReduce = isSuccess && products.map((item) => item.quantity.map((item) => item[1]).reduce((a, b) => a + b))
-
-
-    // console.log('products hahay : ', reReduce);
-
-
-    const navigate = useNavigate();
-    const handleAdd = () => {
-        navigate('/admin/products/add-product')
-    }
-
-
-    const handleAction = (e, value) => {
-        console.log('Record : ', value);
-        console.log('values : ', e.target.innerText);
-
-        if (e.target.innerText === 'Edit') {
-            navigate('/admin/products/add-product', { state: value })
+    const changeTable = (pagination, filters, sorter, extra) => {
+        console.log('params', sorter.order);
+        if (sorter.order === 'ascend') {
+            setQueryParams({
+                ...queryParams,
+                size: pagination.pageSize,
+                page: pagination.current - 1,
+                sort: 'asc'
+            })
+        } else if (sorter.order === 'descend') {
+            setQueryParams({
+                ...queryParams,
+                size: pagination.pageSize,
+                page: pagination.current - 1,
+                sort: 'desc'
+            })
+        } else {
+            setQueryParams({
+                ...queryParams,
+                size: pagination.pageSize,
+                page: pagination.current - 1,
+                sort: ''
+            })
         }
 
-        if (e.target.innerText === 'Delete') {
-            deleteProduct(value.id)
-                .unwrap()
-                .then((res) => {
-                    console.log('res delete : ', res);
-                })
-                .catch((err) => {
-                    console.log('err : ', err);
-                })
+    };
 
 
-
-        }
-
-    }
-
-
-
-    const { Search } = Input;
     const columns = [
         {
             title: 'ID Product',
@@ -134,12 +89,14 @@ const ListProduct = () => {
             title: 'Description',
             dataIndex: 'description',
             align: 'center',
+            // sorter: (a, b) => null,
             width: '25%',
         },
         {
             title: 'Price',
             dataIndex: 'price',
             align: 'center',
+            sorter: (a, b) => null,
             render: (text) => (
                 <p>{`Rp. ${moneyFormatIDR(text)}`}</p>
             )
@@ -149,6 +106,7 @@ const ListProduct = () => {
             title: 'Total Quantity',
             dataIndex: 'totalQuantity',
             align: 'center',
+            // sorter: (a, b) => null,
             render: (text, record) => (
                 <p>{`${text} pcs`}</p>
             )
@@ -162,7 +120,6 @@ const ListProduct = () => {
                 <ActionTable arrayContent={['Edit', 'Delete']} onClick={(e) => {
                     handleAction(e, record)
                 }} />
-                // <p>haha</p>
             ),
         },
 
@@ -209,13 +166,110 @@ const ListProduct = () => {
 
     ]
 
-    const onSearch = (value) => {
-        console.log('value : ', value);
+    // RTK Query
+
+    const {
+        data: products,
+        isLoading,
+        isSuccess,
+        isError,
+        currentData,
+
+    } = useGetProductsQuery(queryParams, { skip: false })
+
+    const [deleteProduct] = useDeleteProductMutation()
+
+
+    // Handle Actions
+
+    const onChange = (newValue) => {
+        setInputValue(newValue);
+
+    };
+
+    const showModal = () => {
+        setIsModalOpen(true);
         setQueryParams({
             ...queryParams,
-            search: value
+            page: 0,
+        })
+
+        if (inputValue === 0) {
+            setInputValue(price.max)
+        }
+
+    };
+    const handleOk = () => {
+        setIsModalOpen(false);
+        setQueryParams({
+            ...queryParams,
+            page: 0,
+            category: category.toString(),
+            price: inputValue,
         })
     };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+
+    };
+
+    const handleCheckbox = (value) => {
+        setCategory(value)
+    }
+
+    const handleAction = (e, value) => {
+        if (e.target.innerText === 'Edit') {
+            navigate('/admin/products/add-product', { state: value })
+        }
+
+        if (e.target.innerText === 'Delete') {
+            deleteProduct(value.id)
+                .unwrap()
+                .then((res) => {
+                    console.log('res delete : ', res);
+                })
+                .catch((err) => {
+                    console.log('err : ', err);
+                })
+
+
+
+        }
+
+    }
+
+    const handleAddProduct = (e) => {
+        if (e.target.innerText === 'Add Product') {
+            navigate('/admin/products/add-product')
+        }
+
+        if (e.target.innerText === 'Add Category') {
+            navigate('/admin/products/category')
+        }
+    }
+
+
+
+    const success = () => {
+        setTotalRecorded(products?.total)
+        console.log('products : ', products);
+
+        setPrice({
+            min: products?.minPrice,
+            max: products?.maxPrice,
+        })
+
+        // setInputValue(products?.minPrice)
+    }
+
+    useEffect(() => {
+        isSuccess && (
+            success()
+        )
+    }, [products, isSuccess, queryParams])
+
+    console.log('price : ', price);
+
     return (
         <>
             <header style={{
@@ -232,33 +286,85 @@ const ListProduct = () => {
                     display: 'flex',
                 }}>
                     <Space size='small'>
-                        <Search placeholder="Search product" onSearch={onSearch} />
-                        <Button onClick={handleAdd} type="primary">Add new product</Button>
+                        <Search placeholder="Search product" onChange={(e) => {
+                            setQueryParams({
+                                ...queryParams,
+                                page: 0,
+                                search: e.target.value
+                            })
+
+                        }} />
+                        <FilterFilled style={{
+                            fontSize: '2rem',
+                            cursor: 'pointer',
+                            color: '#227C70',
+                        }} onClick={showModal} />
+                        <Modal title="Filter Products" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                            <div style={{
+                                marginBottom: '1.5rem',
+                            }}>
+                                <h4>Category</h4>
+                                <Checkbox.Group onChange={handleCheckbox} >
+                                    <Row>
+                                        <Space size={24}>
+                                            <Col span={24}>
+                                                <Checkbox value="shirt">Shirt</Checkbox>
+                                            </Col>
+                                            <Col span={24}>
+                                                <Checkbox value="t-shirt">T-shirt</Checkbox>
+                                            </Col>
+                                            <Col span={24}>
+                                                <Checkbox value="jacket">Jacket</Checkbox>
+                                            </Col>
+                                            <Col span={24}>
+                                                <Checkbox value="pants">Pants</Checkbox>
+                                            </Col>
+                                        </Space>
+
+                                    </Row>
+                                </Checkbox.Group>
+                            </div>
+                            <div>
+                                <h4>Price</h4>
+                                <Row>
+                                    <Col span={12}>
+                                        <Slider
+                                            min={0}
+                                            max={price.max ? price.max : 10000000}
+                                            onChange={onChange}
+                                            value={typeof inputValue === 'number' ? inputValue : 0}
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <InputNumber
+                                            min={0}
+                                            max={price.max ? price.max : 10000000}
+                                            style={{
+                                                margin: '0 16px',
+                                                width: '55%',
+                                            }}
+                                            value={inputValue ? currencyFormatter.format(inputValue, { code: 'IDR' }) : 0}
+                                            onChange={onChange}
+                                        />
+                                    </Col>
+                                </Row>
+                            </div>
+                        </Modal>
+                        <ActionTable arrayContent={['Add Product', 'Add Category']} icon={<PlusSquareFilled style={{
+                            fontSize: '2rem',
+                            cursor: 'pointer',
+                            color: '#1890ff',
+                        }} />} onClick={(e) => {
+                            handleAddProduct(e)
+                        }} />
                     </Space>
 
-                    <Checkbox.Group onChange={handleCheckbox} >
-                        <Row>
-                            <Space size={24}>
-                                <Col span={4}>
-                                    <Checkbox value="shirt">Shirt</Checkbox>
-                                </Col>
-                                <Col span={4}>
-                                    <Checkbox value="t-shirt">T-shirt</Checkbox>
-                                </Col>
-                                <Col span={4}>
-                                    <Checkbox value="jacket">Jacket</Checkbox>
-                                </Col>
-                                <Col span={4}>
-                                    <Checkbox value="pants">Pants</Checkbox>
-                                </Col>
-                            </Space>
 
-                        </Row>
-                    </Checkbox.Group>
                 </div>
             </header>
             <main>
                 <Table
+                    onChange={changeTable}
                     rowKey={record => record.id}
                     columns={columns}
                     dataSource={products?.data}
@@ -269,15 +375,6 @@ const ListProduct = () => {
                         current: queryParams.page + 1,
                         pageSize: queryParams.size,
                         total: totalRecorded,
-                        onChange: (page, pageSize) => {
-                            console.log('page : ', page);
-                            console.log('pageSize : ', pageSize);
-                            setQueryParams({
-                                ...queryParams,
-                                page: page - 1,
-                                size: pageSize,
-                            })
-                        },
 
                         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                     }}

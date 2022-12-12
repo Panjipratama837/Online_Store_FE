@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HomeOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ShoppingCartOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumb, Layout, Menu, Modal, theme } from 'antd';
@@ -37,31 +37,11 @@ const items2 = [
 
 ];
 
-
-
-
-
-
 const Home = () => {
-  console.log("Item Menu", items2);
-
   const navigate = useNavigate();
-  const [key, setKey] = React.useState('');
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [key, setKey] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
 
-
-  useEffect(() => {
-    const data = JSON.parse(window.localStorage.getItem('keyNavv'));
-    if (data !== '') {
-      setKey(data);
-    }
-
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem('keyNavv', JSON.stringify(key));
-
-  }, [key]);
 
   const confirm = () => {
     Modal.confirm({
@@ -83,7 +63,6 @@ const Home = () => {
 
 
   const clickMenu = (e) => {
-    console.log('click ', e);
     setKey(e.key);
 
 
@@ -132,11 +111,24 @@ const Home = () => {
 
   };
 
-
-
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+
+  useEffect(() => {
+    const data = JSON.parse(window.localStorage.getItem('keyNavv'));
+    if (data !== '') {
+      setKey(data);
+    }
+
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('keyNavv', JSON.stringify(key));
+
+  }, [key]);
+
+
   return (
     <>
       <Layout>

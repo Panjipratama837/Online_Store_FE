@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Checkbox, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd'
 import UploadPicture from './UploadPicture'
 
@@ -7,40 +7,17 @@ import { useAddProductMutation, useUpdateProductMutation } from '../../../../api
 import { useLocation, useNavigate } from 'react-router-dom'
 
 const AddProduct = () => {
-    const [addProduct, { isLoading, isSuccess, isError }] = useAddProductMutation()
-    const [updateProduct] = useUpdateProductMutation()
-
-
-
-
+    // Local State
+    const [productForm] = Form.useForm();
+    const [productForm2] = Form.useForm();
     const location = useLocation();
     const navigate = useNavigate();
+    const { Option } = Select;
 
     const productDetail = location.state
 
-    console.log('productDetail : ', productDetail);
-
-
-    const quantityProductDetail = productDetail?.quantity
-
-    console.log('quantityProductDetail : ', quantityProductDetail);
-
-
-
-    const [addProductForm] = Form.useForm();
-    const [addProductForm2] = Form.useForm();
-    const { Option } = Select;
-
-    const [sizeProduct, setSizeProduct] = React.useState([])
-    const [fileImage, setFileImage] = React.useState([])
-    // const [quantity, setQuantity] = React.useState({
-    //     xs: 0,
-    //     s: 0,
-    //     m: 0,
-    //     l: 0,
-    //     xl: 0,
-    // })
-
+    const [sizeProduct, setSizeProduct] = useState([])
+    const [fileImage, setFileImage] = useState([])
     const [quantity, setQuantity] = React.useState(
         [
             ['XS', 0],
@@ -51,39 +28,11 @@ const AddProduct = () => {
         ]
     )
 
-    // const [productUpdate, setProductUpdate] = React.useState(
-    //     productDetail.quantity
-    // )
+    // RTK Query
+    const [addProduct, { isLoading, isSuccess, isError }] = useAddProductMutation()
+    const [updateProduct] = useUpdateProductMutation()
 
-
-    // console.log('productDetail2 : ', productUpdate);
-    console.log('quantity : ', quantity);
-
-
-
-    useEffect(() => {
-        if (productDetail) {
-            setQuantity(productDetail.quantity)
-            setSizeProduct(productDetail.size)
-
-            addProductForm.setFieldsValue({
-                productName: productDetail.productName,
-                category: productDetail.category,
-                description: productDetail.description,
-
-            })
-
-            addProductForm2.setFieldsValue({
-                price: productDetail.price,
-                size: productDetail.size,
-                quantity: productDetail.quantity,
-                uploadPicture: productDetail.uploadPicture,
-            })
-
-        }
-    }, [])
-
-
+    // Handle Actions
     const displayQuantity = quantity.map((item, index) => {
         return (
             <Col key={index} span={4}>
@@ -107,25 +56,7 @@ const AddProduct = () => {
         )
     })
 
-
-
-
-
-
-
-
-
-
-
-    console.log("fileImage : ", fileImage);
-
     const onFinish2 = (values) => {
-        // console.log('Success:', values);
-
-        // const filteredQuantity = quantity.filter(item => item[1] !== 0)
-
-        // console.log("filteredQuantity", filteredQuantity)
-
         values.quantity = quantity
         if (productDetail) {
             values.quantity = productDetail.quantity
@@ -133,7 +64,6 @@ const AddProduct = () => {
         }
 
 
-        // cek type data 
         const dataPicture = []
 
         fileImage.forEach((item, index) => {
@@ -144,21 +74,13 @@ const AddProduct = () => {
 
         // values.uploadPicture = dataPicture
 
-        // get values form addProductForm
-        const dataForm = addProductForm.getFieldsValue()
-        // console.log("dataForm : ", dataForm);
-
-
-
-
+        const dataForm = productForm.getFieldsValue()
         const data = {
             ...dataForm,
             ...values,
         }
-        console.log("data : ", data);
 
         if (productDetail) {
-            console.log("updateeee");
             updateProduct(data)
                 .unwrap()
                 .then((res) => {
@@ -173,8 +95,8 @@ const AddProduct = () => {
                 .unwrap()
                 .then((res) => {
                     console.log("res : ", res);
-                    addProductForm.resetFields();
-                    addProductForm2.resetFields();
+                    productForm.resetFields();
+                    productForm2.resetFields();
 
                     setSizeProduct([])
                     setQuantity(
@@ -191,30 +113,6 @@ const AddProduct = () => {
                     console.log("err : ", err);
                 })
         }
-
-        // axios.post('http://localhost:8000/api/product/create', data)
-        //     .then((res) => {
-        //         console.log("res : ", res.data);
-        //         addProductForm.resetFields();
-        //         addProductForm2.resetFields();
-
-        //         setSizeProduct([])
-        //         setQuantity(
-        //             [
-        //                 ['XS', 0],
-        //                 ['S', 0],
-        //                 ['M', 0],
-        //                 ['L', 0],
-        //                 ['XL', 0],
-        //             ]
-        //         )
-
-        //     })
-        //     .catch((err) => {
-        //         console.log("err : ", err);
-        //     })
-
-
     };
 
     const onFinishFailed2 = (errorInfo) => {
@@ -222,18 +120,7 @@ const AddProduct = () => {
     };
 
     const handleCheckbox = (value) => {
-        console.log('value : ', value);
         setSizeProduct(value)
-
-
-        if (productDetail) {
-            productDetail.size = value
-            if (!productDetail.size.includes('XS')) {
-                let newQuantity = [...productDetail.quantity]
-                newQuantity[0][1] = 0
-                productDetail.quantity = newQuantity
-            }
-        }
 
         if (!value.includes('XS')) {
             let newQuantity = [...quantity]
@@ -264,14 +151,30 @@ const AddProduct = () => {
             newQuantity[4][1] = 0
             setQuantity(newQuantity)
         }
-
-
-
-
     }
 
 
+    useEffect(() => {
+        if (productDetail) {
+            setQuantity(productDetail.quantity)
+            setSizeProduct(productDetail.size)
 
+            productForm.setFieldsValue({
+                productName: productDetail.productName,
+                category: productDetail.category,
+                description: productDetail.description,
+
+            })
+
+            productForm2.setFieldsValue({
+                price: productDetail.price,
+                size: productDetail.size,
+                quantity: productDetail.quantity,
+                uploadPicture: productDetail.uploadPicture,
+            })
+
+        }
+    }, [])
 
     return (
         <>
@@ -285,7 +188,7 @@ const AddProduct = () => {
             }} gutter={[16, 16]}>
                 <Col xs={24} sm={24} md={24} lg={12} xl={12}>
                     <Form
-                        form={addProductForm}
+                        form={productForm}
                         name="basic"
                         layout='vertical'
                         labelCol={{
@@ -361,7 +264,7 @@ const AddProduct = () => {
                 <Col xs={24} sm={24} md={24} lg={12} xl={12}>
 
                     <Form
-                        form={addProductForm2}
+                        form={productForm2}
                         name="basic2"
                         layout='vertical'
                         labelCol={{
