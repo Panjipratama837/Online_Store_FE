@@ -16,6 +16,12 @@ const ListProduct = () => {
     const { Search } = Input;
     const location = useLocation();
 
+    console.log('location : ', location.state);
+    // clear location.state
+
+
+
+
     const [inputValue, setInputValue] = useState(0);
     console.log('inputValue : ', inputValue);
 
@@ -40,33 +46,43 @@ const ListProduct = () => {
         category: 'all',
         search: '',
         price: 10000000,
-        sort: ''
+        sort: '',
     });
 
-    console.log('category : ', category);
+    console.log('queryParams : ', queryParams);
 
     const changeTable = (pagination, filters, sorter, extra) => {
-        console.log('params', sorter.order);
-        if (sorter.order === 'ascend') {
+        console.log('params', sorter);
+        setQueryParams({
+            ...queryParams,
+            size: pagination.pageSize,
+            page: pagination.current - 1,
+            // sort: 'asc',
+        })
+
+        if (sorter.order === 'ascend' && sorter.field === 'totalQuantity') {
             setQueryParams({
                 ...queryParams,
                 size: pagination.pageSize,
                 page: pagination.current - 1,
-                sort: 'asc'
+                sort: 'asc',
             })
-        } else if (sorter.order === 'descend') {
+        }
+        if (sorter.order === 'descend' && sorter.field === 'totalQuantity') {
             setQueryParams({
                 ...queryParams,
                 size: pagination.pageSize,
                 page: pagination.current - 1,
-                sort: 'desc'
+                sort: 'desc',
             })
-        } else {
+        }
+
+        if (sorter.order === undefined && sorter.field === 'totalQuantity') {
             setQueryParams({
                 ...queryParams,
                 size: pagination.pageSize,
                 page: pagination.current - 1,
-                sort: ''
+                sort: '',
             })
         }
 
@@ -106,7 +122,7 @@ const ListProduct = () => {
             title: 'Price',
             dataIndex: 'price',
             align: 'center',
-            sorter: (a, b) => null,
+            // sorter: (a, b) => null,
             render: (text) => (
                 <p>{`Rp. ${moneyFormatIDR(text)}`}</p>
             )
@@ -116,7 +132,7 @@ const ListProduct = () => {
             title: 'Total Quantity',
             dataIndex: 'totalQuantity',
             align: 'center',
-            // sorter: (a, b) => null,
+            sorter: (a, b) => null,
             render: (text, record) => (
                 <p>{`${text} pcs`}</p>
             )
@@ -209,6 +225,7 @@ const ListProduct = () => {
         }
 
     };
+
     const handleOk = () => {
         setIsModalOpen(false);
         setQueryParams({
@@ -218,6 +235,8 @@ const ListProduct = () => {
             price: inputValue,
         })
     };
+
+
     const handleCancel = () => {
         setIsModalOpen(false);
 
@@ -260,23 +279,14 @@ const ListProduct = () => {
 
         if (e.target.innerText === 'Delete') {
             confirm(value.id)
-
-
-
-
-
         }
 
     }
 
-    const handleAddProduct = (e) => {
-        if (e.target.innerText === 'Add Product') {
-            navigate('/admin/products/add-product')
-        }
 
-        if (e.target.innerText === 'Add Category') {
-            navigate('/admin/products/category')
-        }
+
+    const handleAddProduct = () => {
+        navigate('/admin/products/add-product')
     }
 
 
@@ -302,31 +312,32 @@ const ListProduct = () => {
     useEffect(() => {
 
         window.onload = () => {
-            setNotif(false);
+            location.state = undefined
         }
 
-        if (location.state?.notif) {
-            setNotif(true)
-        }
+        // if (location.state?.notif) {
+        //     setNotif(true)
+        // }
 
-        if (location.state?.message) {
-            setMessage(location.state?.message)
-        }
+        // if (location.state?.message) {
+        //     setMessage(location.state?.message)
+        // }
 
 
         setTimeout(() => {
-            setNotif(false)
+            location.state = undefined
+
             // setMessage('')
         }, 2000);
 
     }, [])
 
-    console.log('price : ', price);
+    console.log('after location : ', location);
 
     return (
         <>
-            {notif && (
-                <Notification message={message} />
+            {location.state?.notif && (
+                <Notification message={location.state?.message} />
             )}
             <header style={{
                 display: 'flex',
@@ -408,13 +419,12 @@ const ListProduct = () => {
                                 </Row>
                             </div>
                         </Modal>
-                        <ActionTable arrayContent={['Add Product', 'Add Category']} icon={<PlusSquareFilled style={{
+
+                        <PlusSquareFilled style={{
                             fontSize: '2rem',
                             cursor: 'pointer',
                             color: '#1890ff',
-                        }} />} onClick={(e) => {
-                            handleAddProduct(e)
-                        }} />
+                        }} onClick={handleAddProduct} />
                     </Space>
 
 

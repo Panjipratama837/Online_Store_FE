@@ -53,7 +53,7 @@ const Home = () => {
       ),
       onOk() {
         navigate('/login');
-        window.localStorage.clear();
+        window.sessionStorage.clear();
       },
       onCancel() {
         setKey((prevkey) => (prevkey = key));
@@ -116,7 +116,7 @@ const Home = () => {
   } = theme.useToken();
 
   useEffect(() => {
-    const data = JSON.parse(window.localStorage.getItem('keyNavv'));
+    const data = JSON.parse(window.sessionStorage.getItem('keyNavv'));
     if (data !== '') {
       setKey(data);
     }
@@ -124,7 +124,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem('keyNavv', JSON.stringify(key));
+    window.sessionStorage.setItem('keyNavv', JSON.stringify(key));
 
   }, [key]);
 

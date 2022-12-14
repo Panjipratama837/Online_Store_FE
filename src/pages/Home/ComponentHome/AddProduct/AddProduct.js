@@ -6,6 +6,7 @@ import axios from 'axios'
 import { useAddProductMutation, useUpdateProductMutation } from '../../../../api/productApiSlice'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Notification } from '../../../../utils'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 
 const AddProduct = () => {
     // Local State
@@ -93,7 +94,7 @@ const AddProduct = () => {
                 .unwrap()
                 .then((res) => {
                     console.log("res update: ", res);
-                    navigate('/admin/products', { state: { notif: true, message: res.message } })
+                    navigate('/admin/products', { state: { notif: true, message: res.message }, replace: true })
                 })
                 .catch((err) => {
                     console.log("err : ", err);
@@ -193,6 +194,12 @@ const AddProduct = () => {
             {notif && (
                 <Notification message="message from parent" />
             )}
+            <p style={{
+                fontSize: '1rem',
+                marginBottom: '2rem',
+                color: 'blue',
+                cursor: 'pointer',
+            }} onClick={() => navigate("/admin/products")}><ArrowLeftOutlined /> Back</p>
             <h1 style={{
                 fontSize: '1rem',
                 fontWeight: '600',

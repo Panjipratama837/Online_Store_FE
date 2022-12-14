@@ -1,4 +1,4 @@
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, SmallDashOutlined } from '@ant-design/icons';
 import { Popover } from 'antd';
 import React from 'react'
 import Styles from './ActionTable.module.scss'
@@ -33,7 +33,7 @@ const ActionTable = (props) => {
             onOpenChange={handleOpenChange}
         >
 
-            {icon ? icon : <EditOutlined className={Styles.edit_action} />}
+            {icon ? icon : <SmallDashOutlined className={Styles.edit_action} />}
 
         </Popover>
     )
