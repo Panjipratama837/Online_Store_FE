@@ -3,9 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import currencyFormatter from 'currency-formatter';
 
 import React, { useEffect, useState } from 'react'
-import { DeleteFilled, DeleteOutlined, EditOutlined, FilterFilled, PlusSquareFilled, PlusSquareOutlined, SortAscendingOutlined } from '@ant-design/icons';
-import { ActionTable, moneyFormatIDR, Notification } from '../../../../utils';
-import { useDeleteProductMutation, useGetProductsQuery } from '../../../../api/productApiSlice';
+import { DeleteFilled, DeleteOutlined, EditOutlined, FilterFilled, MenuFoldOutlined, PlusSquareFilled, PlusSquareOutlined, SortAscendingOutlined } from '@ant-design/icons';
+import { ActionTable, moneyFormatIDR, Notification, ShowConfirm } from '../../../../utils';
+import { useAddCategoryMutation, useDeleteCategoryMutation, useGetCategoriesQuery } from '../../../../api/categoryApiSlice';
 
 
 
@@ -16,15 +16,15 @@ const Category = () => {
     const location = useLocation();
     const { Search } = Input;
     const [totalRecorded, setTotalRecorded] = useState(0);
-    const [category, setCategory] = useState([]);
+    const [message, setMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [notif, setNotif] = useState(false);
+    const [payload, setPayload] = useState({})
+    const [category, setCategory] = useState('')
     const [queryParams, setQueryParams] = useState({
         page: 0,
         size: 5,
-        category: 'all',
         search: '',
-        price: 10000000,
-        sort: '',
     });
 
     console.log('queryParams : ', queryParams);
@@ -47,13 +47,10 @@ const Category = () => {
             dataIndex: 'id',
             // width: '30%',
             align: 'center',
-            render: (text, record) => <Link style={{ cursor: "pointer" }} to={`/admin/products/detail/${record.id}`} params={{ id: record?.id }}>
-                {text}
-            </Link>,
         },
         {
             title: 'Category',
-            dataIndex: 'category',
+            dataIndex: 'categoryName',
             align: 'center',
         },
 
@@ -62,11 +59,52 @@ const Category = () => {
             key: 'action',
             align: 'center',
             render: (record) => (
-                <DeleteOutlined style={{
-                    color: 'red',
-                    fontSize: '1.5rem',
-                    cursor: "pointer"
-                }} />
+                //     deleteCategory(record?.id)
+                //         .unwrap()
+                //         .then((res) => {
+                //             console.log("Res: ", res);
+                //             setMessage(res.message)
+                //             setNotif(true)
+
+                //             setTimeout(() => {
+                //                 setNotif(false)
+                //             }, 2000)
+                //         })
+                //         .catch((err) => {
+                //             console.log("Err Message: ", err);
+                //         })
+                // }} />
+
+
+
+                <ShowConfirm
+                    title={'Delete Category'}
+                    content={
+                        <p>Are you sure?</p>
+                    }
+                    icon={<DeleteOutlined style={{
+                        fontSize: '1.5rem',
+                        color: "red",
+                        cursor: "pointer"
+                    }} />}
+                    handleOk={() => {
+                        deleteCategory(record?.id)
+                            .unwrap()
+                            .then((res) => {
+                                console.log("Res: ", res);
+                                setMessage(res.message)
+                                setNotif(true)
+
+                                setTimeout(() => {
+                                    setNotif(false)
+                                }, 2000)
+                            })
+                            .catch((err) => {
+                                console.log("Err Message: ", err);
+                            })
+                    }}
+                    handleCancel={() => console.log('Cancel Props')}
+                />
             ),
         },
 
@@ -93,6 +131,17 @@ const Category = () => {
     ]
 
     // RTK Query
+    const {
+        data: categories,
+        isLoading,
+        isSuccess,
+        isError,
+    } = useGetCategoriesQuery(queryParams, { skip: false })
+
+    console.log('isSuccess: ', isSuccess);
+
+    const [addCategory] = useAddCategoryMutation()
+    const [deleteCategory] = useDeleteCategoryMutation()
 
 
     // Handle Actions
@@ -105,35 +154,48 @@ const Category = () => {
     };
     const handleCancel = () => {
         setIsModalOpen(false);
+        setCategory('')
     };
 
 
-    const handleAddProduct = () => {
-        navigate('/admin/products/add-product')
-    }
+    const handleAddCategory = () => {
+        addCategory(payload)
+            .unwrap()
+            .then((res) => {
+                console.log("Res : ", res);
+                setMessage(res?.message)
+                setNotif(true)
+                setCategory('')
 
+                setTimeout(() => {
+                    setNotif(false)
+                }, 2000)
+            })
+            .catch((err) => {
+                console.log('Error: ', err);
+            })
+    }
 
 
     const success = () => {
+        setTotalRecorded(categories?.total)
+        console.log('Categories : ', categories);
 
     }
 
-    // useEffect(() => {
-    //     isSuccess && (
-    //         success()
-    //     )
-    // }, [products, isSuccess, queryParams])
-
     useEffect(() => {
-
-    }, [])
-
+        isSuccess && (
+            success()
+        )
+    }, [categories, queryParams])
 
     return (
         <>
-            {/* {location.state?.notif && (
-                <Notification message={location.state?.message} />
-            )} */}
+            {notif && (
+                <Notification message={message} />
+            )}
+
+
 
             <header style={{
                 display: 'flex',
@@ -155,7 +217,6 @@ const Category = () => {
                                 page: 0,
                                 search: e.target.value
                             })
-
                         }} />
 
                         <PlusSquareFilled style={{
@@ -164,14 +225,28 @@ const Category = () => {
                             color: '#1890ff',
                         }} onClick={showModal} />
 
-                        <Modal title="Filter Products" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                        <Modal footer={null} title="Add Category" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                             <div style={{
                                 marginBottom: '1.5rem',
                             }}>
-                                <h4>Category</h4>
-                            </div>
-                            <div>
-                                <h4>Price</h4>
+                                <Input.Group compact>
+                                    <Input
+                                        style={{
+                                            width: 'calc(100% - 150px)',
+
+                                        }}
+                                        onChange={(e) => {
+                                            console.log('Value Input: ', e.target.value);
+                                            const valueInput = e.target.value
+                                            setCategory(valueInput)
+                                            setPayload({
+                                                categoryName: valueInput
+                                            })
+                                        }}
+                                        value={category}
+                                    />
+                                    <Button type="primary" onClick={handleAddCategory} >Add category</Button>
+                                </Input.Group>
                             </div>
                         </Modal>
                     </Space>
@@ -184,7 +259,7 @@ const Category = () => {
                     onChange={changeTable}
                     rowKey={record => record.id}
                     columns={columns}
-                    dataSource={data}
+                    dataSource={categories?.data}
                     style={{
                         marginTop: '1.5rem',
                     }}

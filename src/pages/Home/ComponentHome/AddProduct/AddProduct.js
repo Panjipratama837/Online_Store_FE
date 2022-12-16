@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Checkbox, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd'
+import { Button, Checkbox, Col, Form, Input, InputNumber, message, Row, Select, Space } from 'antd'
 import UploadPicture from './UploadPicture'
 
 import axios from 'axios'
@@ -10,7 +10,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 
 const AddProduct = () => {
     // Local State
-    const [productForm] = Form.useForm();
+    // const [productForm] = Form.useForm();
     const [productForm2] = Form.useForm();
     const location = useLocation();
     const navigate = useNavigate();
@@ -19,6 +19,7 @@ const AddProduct = () => {
     const productDetail = location.state
 
     const [notif, setNotif] = useState(false)
+    const [message, setMessage] = useState('')
     const [sizeProduct, setSizeProduct] = useState([])
     const [fileImage, setFileImage] = useState([])
     const [quantity, setQuantity] = React.useState(
@@ -83,14 +84,14 @@ const AddProduct = () => {
 
         // values.uploadPicture = dataPicture
 
-        const dataForm = productForm.getFieldsValue()
-        const data = {
-            ...dataForm,
-            ...values,
-        }
+        // const dataForm = productForm.getFieldsValue()
+        // const data = {
+        //     ...dataForm,
+        //     ...values,
+        // }
 
         if (productDetail) {
-            updateProduct(data)
+            updateProduct(values)
                 .unwrap()
                 .then((res) => {
                     console.log("res update: ", res);
@@ -101,11 +102,15 @@ const AddProduct = () => {
                 })
 
         } else {
-            addProduct(data)
+            addProduct(values)
                 .unwrap()
                 .then((res) => {
-                    console.log("res : ", res);
-                    productForm.resetFields();
+                    console.log("res : ", res.message);
+                    setNotif(true)
+                    setMessage(res.message)
+                    setTimeout(() => {
+                        setNotif(false)
+                    }, 2000)
                     productForm2.resetFields();
 
                     setSizeProduct([])
@@ -124,7 +129,7 @@ const AddProduct = () => {
                 })
         }
 
-        setNotif(true)
+        // setNotif(true)
 
     };
 
@@ -172,14 +177,11 @@ const AddProduct = () => {
             setQuantity(productDetail.quantity)
             setSizeProduct(productDetail.size)
 
-            productForm.setFieldsValue({
+
+            productForm2.setFieldsValue({
                 productName: productDetail.productName,
                 category: productDetail.category,
                 description: productDetail.description,
-
-            })
-
-            productForm2.setFieldsValue({
                 price: productDetail.price,
                 size: productDetail.size,
                 quantity: productDetail.quantity,
@@ -192,7 +194,7 @@ const AddProduct = () => {
     return (
         <>
             {notif && (
-                <Notification message="message from parent" />
+                <Notification message={message} />
             )}
             <p style={{
                 fontSize: '1rem',
@@ -205,24 +207,25 @@ const AddProduct = () => {
                 fontWeight: '600',
             }}>{productDetail ? 'Update Product' : 'Add Product'}</h1>
 
-            <Row style={{
-                marginTop: '1.5rem',
-            }} gutter={[16, 16]}>
-                <Col xs={24} sm={24} md={24} lg={12} xl={12}>
-                    <Form
-                        form={productForm}
-                        name="basic"
-                        layout='vertical'
-                        labelCol={{
-                            span: 8,
-                        }}
-                        wrapperCol={{
-                            span: 22,
-                        }}
-                        // onFinish={onFinish}
-                        // onFinishFailed={onFinishFailed}
-                        autoComplete="off"
-                    >
+            <Form
+                form={productForm2}
+                name="basic2"
+                layout='vertical'
+                labelCol={{
+                    span: 12,
+                }}
+                wrapperCol={{
+                    span: 24,
+                }}
+                onFinish={onFinish2}
+                onFinishFailed={onFinishFailed2}
+                autoComplete="off"
+            >
+                <Row style={{
+                    marginTop: '1.5rem',
+                }} gutter={[16, 16]}>
+                    <Col xs={24} sm={24} md={24} lg={12} xl={12}>
+
                         <Form.Item
                             label="Product Name"
                             name="productName"
@@ -266,39 +269,11 @@ const AddProduct = () => {
                         >
                             <Input.TextArea rows={4} showCount maxLength={100} />
                         </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={24} lg={12} xl={12}>
 
 
-                        {/* <Form.Item
-                            wrapperCol={{
-                                offset: 0,
-                                span: 16,
-                            }}
-                        >
-                            <Button type="primary" htmlType="submit">
-                                Submit
-                            </Button>
-                        </Form.Item> */}
-
-
-                    </Form>
-                </Col>
-
-                <Col xs={24} sm={24} md={24} lg={12} xl={12}>
-
-                    <Form
-                        form={productForm2}
-                        name="basic2"
-                        layout='vertical'
-                        labelCol={{
-                            span: 12,
-                        }}
-                        wrapperCol={{
-                            span: 24,
-                        }}
-                        onFinish={onFinish2}
-                        onFinishFailed={onFinishFailed2}
-                        autoComplete="off"
-                    >
 
                         <Form.Item
                             label="Upload Picture"
@@ -385,10 +360,10 @@ const AddProduct = () => {
                         </Form.Item>
 
 
-                    </Form>
-                </Col>
+                    </Col>
 
-            </Row>
+                </Row>
+            </Form>
         </>
     )
 }

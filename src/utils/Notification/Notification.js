@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, notification, Space } from 'antd';
 const Notification = (props) => {
-    const { message } = props;
+    const { message, description } = props;
     const [api, contextHolder] = notification.useNotification();
     const openNotificationWithIcon = (type, placement, message, description) => {
         api[type]({
@@ -13,7 +13,7 @@ const Notification = (props) => {
     };
 
     useEffect(() => {
-        openNotificationWithIcon('success', 'top', message)
+        openNotificationWithIcon('success', 'top', message, description)
     }, [])
 
 

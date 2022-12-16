@@ -1,5 +1,6 @@
-import ActionTable from "./Component/ActionTable/ActionTable";
-import moneyFormatIDR from "./Component/MoneyFormatIDR";
-import Notification from "./Component/Notification/Notification";
+import ActionTable from "./ActionTable/ActionTable";
+import moneyFormatIDR from "./MoneyFormatIDR";
+import Notification from "./Notification/Notification";
+import ShowConfirm from "./Modal"
 
-export { ActionTable, moneyFormatIDR, Notification };
+export { ActionTable, moneyFormatIDR, Notification, ShowConfirm };

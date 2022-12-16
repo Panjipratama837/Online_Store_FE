@@ -7,13 +7,6 @@ export const productApiSlice = createApi({
     endpoints: (builder) => ({
         getProducts: builder.query({
             query: ({ page, size, category, search, price, sort, sortQuantity }) => {
-                console.log('asu page : ', page);
-                console.log('asu size : ', size);
-                console.log('asu category : ', category);
-                console.log('asu productName : ', search);
-                console.log('asu price : ', price);
-                console.log('asu sort : ', sort);
-                console.log('asu sortQuantity : ', sortQuantity);
                 return `api/products?page=${page + 1}&size=${size}&category=${category}&search=${search}&price=${price}&sort=${sort}`
             },
             providesTags: ['Products'],

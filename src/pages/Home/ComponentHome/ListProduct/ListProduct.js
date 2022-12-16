@@ -261,6 +261,11 @@ const ListProduct = () => {
                         console.log('res delete : ', res);
                         setMessage(res.message)
                         setNotif(true)
+
+                        setTimeout(() => {
+                            setNotif(false)
+                            setMessage('')
+                        }, 2000)
                     })
                     .catch((err) => {
                         console.log('err : ', err);
@@ -315,19 +320,19 @@ const ListProduct = () => {
             location.state = undefined
         }
 
-        // if (location.state?.notif) {
-        //     setNotif(true)
-        // }
+        if (location.state?.notif) {
+            setNotif(true)
+        }
 
-        // if (location.state?.message) {
-        //     setMessage(location.state?.message)
-        // }
+        if (location.state?.message) {
+            setMessage(location.state?.message)
+        }
 
 
         setTimeout(() => {
             location.state = undefined
 
-            // setMessage('')
+            setMessage('')
         }, 2000);
 
     }, [])
@@ -336,8 +341,8 @@ const ListProduct = () => {
 
     return (
         <>
-            {location.state?.notif && (
-                <Notification message={location.state?.message} />
+            {notif && (
+                <Notification message={message} />
             )}
             <header style={{
                 display: 'flex',
