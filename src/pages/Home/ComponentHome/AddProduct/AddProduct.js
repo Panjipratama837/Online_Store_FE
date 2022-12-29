@@ -63,6 +63,7 @@ const AddProduct = () => {
     })
 
     const onFinish2 = (values) => {
+        console.log("Ini values : ", values);
         values.quantity = quantity
         if (productDetail) {
             values.quantity = productDetail.quantity
